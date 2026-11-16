@@ -1,0 +1,63 @@
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+stages:
+  - static analysis
+  - build and test
+
+default:
+  image:
+    name: $CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX/gmeligio/flutter-android:3.47.4
+    docker:
+      # The image defaults to a non-root user, but the runner checks out the
+      # repo as root. Run as root instead.
+      user: root
+  before_script:
+    # Since we run as root, git refuses to touch the flutter-user-owned SDK.
+    - git config --global --add safe.directory "$FLUTTER_ROOT"
+    - flutter pub get
+  timeout: 30 minutes
+
+format:
+  stage: static analysis
+  script:
+    - dart format . --set-exit-if-changed
+
+analyze:
+  stage: static analysis
+  script:
+    - flutter analyze --fatal-infos --fatal-warnings
+
+# The generated Pigeon files are committed, because the package is published.
+generated-code-is-up-to-date:
+  stage: static analysis
+  script:
+    - dart run pigeon --input pigeons/shared_secure_storage.dart
+    - dart format lib/src/messages.g.dart
+    - git diff --exit-code
+
+publishable:
+  stage: static analysis
+  script:
+    - flutter pub publish --dry-run
+
+unit tests:
+  stage: build and test
+  script:
+    - flutter test
+
+# Compiles the Kotlin code. The Keystore and Keychain themselves are covered by
+# the integration tests. Those need a device, so run them locally before a
+# release: cd example && flutter test integration_test
+build android example:
+  stage: build and test
+  script:
+    # The example asks for an 8 GB Gradle heap, more than the runner allows, so
+    # the daemon gets killed. Settings in the Gradle user home take precedence.
+    - mkdir -p ~/.gradle
+    - echo "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g" >> ~/.gradle/gradle.properties
+    - echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+    - cd example
+    - flutter build apk --debug
