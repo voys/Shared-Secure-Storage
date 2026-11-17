@@ -1,7 +1,7 @@
 name: shared_secure_storage
 description: "Secure key-value storage shared between Dart and native code, readable by native code before Flutter starts."
-version: 0.1.0
-repository: https://github.com/open-voip-alliance/shared-secure-storage
+version: 0.1.1
+repository: https://github.com/voys/Shared-Secure-Storage
 
 environment:
   sdk: ^3.8.0

@@ -4,12 +4,12 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'shared_secure_storage'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'Secure key-value storage shared between Dart and native code, readable before Flutter starts.'
   s.description      = <<-DESC
 Secure key-value storage shared between Dart and native code, readable before Flutter starts.
                        DESC
-  s.homepage         = 'https://github.com/open-voip-alliance/shared-secure-storage'
+  s.homepage         = 'https://github.com/voys/Shared-Secure-Storage'
   s.license          = { :file => '../LICENSE' }
   s.author           = 'Open VoIP Alliance'
   s.source           = { :path => '.' }
