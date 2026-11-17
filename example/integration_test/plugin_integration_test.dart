@@ -38,6 +38,17 @@ void main() {
     expect(await storage.readMany(keys), {'test.b': 'two'});
   });
 
+  testWidgets('writes that are not awaited are applied in order', (_) async {
+    final writes = [
+      for (var i = 0; i < 100; i++) storage.write('test.a', '$i'),
+      storage.delete('test.a'),
+      storage.write('test.a', 'last'),
+    ];
+    await Future.wait(writes);
+
+    expect(await storage.read('test.a'), 'last');
+  });
+
   testWidgets('native code reads what Dart wrote', (_) async {
     await storage.write('test.a', 'from dart');
 

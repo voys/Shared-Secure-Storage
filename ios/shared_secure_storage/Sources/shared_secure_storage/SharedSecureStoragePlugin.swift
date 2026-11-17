@@ -11,18 +11,25 @@ public class SharedSecureStoragePlugin: NSObject, FlutterPlugin, SharedSecureSto
         )
     }
 
+    // These run on the main actor so calls are handled one at a time and in the order Dart made
+    // them, otherwise an older write could overtake a newer one.
+
+    @MainActor
     func read(keys: [String]) async throws -> [String: String] {
         try withKeychainErrors { try storage.read(keys) }
     }
 
+    @MainActor
     func write(values: [String: String]) async throws {
         try withKeychainErrors { try storage.write(values) }
     }
 
+    @MainActor
     func delete(keys: [String]) async throws {
         try withKeychainErrors { try storage.delete(keys) }
     }
 
+    @MainActor
     func keySecurityLevel() async throws -> String? {
         nil
     }
