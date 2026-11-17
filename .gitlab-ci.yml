@@ -54,10 +54,11 @@ unit tests:
 build android example:
   stage: build and test
   script:
-    # The example asks for an 8 GB Gradle heap, more than the runner allows, so
-    # the daemon gets killed. Settings in the Gradle user home take precedence.
-    - mkdir -p ~/.gradle
-    - echo "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g" >> ~/.gradle/gradle.properties
-    - echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
     - cd example
+    # The example asks for an 8 GB Gradle heap, more than the runner allows, so
+    # the daemon gets killed. Changed in the project itself, because the image
+    # doesn't use the same home directory for the shell and for Gradle.
+    - sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=1g/' android/gradle.properties
+    # Keeps the Kotlin compiler inside the Gradle process instead of a second one.
+    - echo "kotlin.compiler.execution.strategy=in-process" >> android/gradle.properties
     - flutter build apk --debug
